@@ -1,0 +1,19 @@
+*{color:antiquewhite!important;}
+body{
+background-image: url("https://media.istockphoto.com/id/1600458918/vector/laugh-ha-ha-background.jpg?s=612x612&w=0&k=20&c=rW6TtC5pbxhEWTo42AaJ7IOw2GI6Z8YX7tBZbaX_C1Y=");
+background-repeat: repeat;
+background-position: center;
+background-size: cover;
+color:antiquewhite;
+}
+#box{
+    background-color: rgb(0, 0, 0);
+    border-radius: 5px ;
+    border: 5px solid red
+}
+#next{
+    color:red!important;
+    font-weight: bolder;
+    font-style: oblique;
+    border: 3px dotted red;
+}
