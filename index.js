@@ -11,11 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 let jokeElement = document.getElementById("joke"); // joke paragraph element
 let jokeBtn = document.getElementById("next"); // next joke button
 let API = 'https://icanhazdadjoke.com/'; // API endpoint
+let APIWEATHER = "https://www.meteosource.com/api/v1/free/point?place_id=barcelona&sections=current&timezone=Europe%2FMadrid&language=en&units=auto&key=ls7dk118dcil19tkre8c7pwzkdgoerlvo5dmtbsm";
 let currentReport; // jokeReport variable
 let reportAcudits = []; // Array of joke reports
 let btnScore1 = document.getElementById("score1"); // button of "boring"
 let btnScore2 = document.getElementById("score2"); // button of "average"
 let btnScore3 = document.getElementById("score3"); // button of "very nice"
+let bubbleWeather = document.getElementById("weather");
 function addJokeToParagraph() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -27,7 +29,7 @@ function addJokeToParagraph() {
             });
             // Verify if the response is ok, if it isn't then throw an error
             if (!res.ok) {
-                throw new Error('Error al obtener la respuesta de la API');
+                throw new Error('Error in the API request');
             }
             // Pick the data from the json formant and assign to 'data' variable
             let data = yield res.json();
@@ -104,3 +106,44 @@ function nextJoke() {
     addJokeToParagraph();
     showJokesReport();
 }
+// weather api request
+function weatherRequest() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let res = yield fetch(APIWEATHER, {
+                headers: {
+                    'accept': 'application/json',
+                }
+            });
+            if (!res.ok) {
+                throw new Error('Error in the API request');
+            }
+            let data = yield res.json();
+            // create elements for weather data
+            let location = document.createElement("p");
+            let temperature = document.createElement("p");
+            let wind = document.createElement("p");
+            let clouds = document.createElement("p");
+            location.innerHTML = `Barcelona`;
+            temperature.innerHTML = `Temperature : ${data.current.temperature}°C`;
+            wind.innerHTML = `Wind : ${data.current.wind.speed} km/h`;
+            clouds.innerHTML = `Clouds cover : ${data.current.cloud_cover} %`;
+            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(location);
+            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(temperature);
+            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(wind);
+            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(clouds);
+            console.log(data);
+            return data;
+        }
+        catch (e) {
+            // Catch all exceptions from API request
+            if (e instanceof Error) {
+                throw new Error(e.message);
+            }
+            else {
+                console.log('error: ' + e);
+            }
+        }
+    });
+}
+weatherRequest();
