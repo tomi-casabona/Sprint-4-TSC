@@ -1,15 +1,19 @@
-*{color:antiquewhite!important;}
 body{
 background-image: url("https://media.istockphoto.com/id/1600458918/vector/laugh-ha-ha-background.jpg?s=612x612&w=0&k=20&c=rW6TtC5pbxhEWTo42AaJ7IOw2GI6Z8YX7tBZbaX_C1Y=");
 background-repeat: repeat;
 background-position: center;
 background-size: cover;
-color:antiquewhite;
 }
 #box{
     background-color: rgb(0, 0, 0);
     border-radius: 5px ;
     border: 5px solid red
+}
+#joke{
+    color:antiquewhite!important;
+    font-size: x-large;
+    font-weight: 500;
+    font-family: 'Times New Roman', Times, serif;
 }
 #next{
     color:red!important;
@@ -18,11 +22,19 @@ color:antiquewhite;
     border: 3px dotted red;
 }
 #title{
-    margin-top : -50px;
+    margin-top : -100px;
+    color:antiquewhite!important;
 }
-.weather{   
+#score1, #score2, #score3 {
+    color: antiquewhite;
+}
+#weather {   
+    color:black!important;
+    background-image: url("https://p.turbosquid.com/ts-thumb/iH/hBIRSt/Ew/66/png/1679470685/5000x5000/fit_q99/713c6591f0f254b5850eac4cbabad33c6dd6f1d6/66.jpg");
+    background-size:contain;
     border-radius: 100px;
     border: 5px solid antiquewhite;
-    height: 180px;
+    height: 170px;
     text-align: center;
 }
+#weather p {color:black;}

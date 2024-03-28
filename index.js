@@ -8,31 +8,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+//Variables
 let jokeElement = document.getElementById("joke"); // joke paragraph element
 let jokeBtn = document.getElementById("next"); // next joke button
-let API = 'https://icanhazdadjoke.com/'; // API endpoint
-let APIWEATHER = "https://www.meteosource.com/api/v1/free/point?place_id=barcelona&sections=current&timezone=Europe%2FMadrid&language=en&units=auto&key=ls7dk118dcil19tkre8c7pwzkdgoerlvo5dmtbsm";
+let APIJOKES1 = 'https://icanhazdadjoke.com/'; // API endpoint
+let APIJOKES2 = "https://v2.jokeapi.dev/joke/Any?type=single"; //API endpoint
+let APIJOKESRELIGIOUS = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,political,racist,sexist,explicit&type=single"; //API endpoint
+let APIWEATHER = "https://www.meteosource.com/api/v1/free/point?place_id=barcelona&sections=current&timezone=Europe%2FMadrid&language=en&units=auto&key=ls7dk118dcil19tkre8c7pwzkdgoerlvo5dmtbsm"; // API endpoint
+let apiSelectorNumber; // used for choosing the jokes API
 let currentReport; // jokeReport variable
 let reportAcudits = []; // Array of joke reports
 let btnScore1 = document.getElementById("score1"); // button of "boring"
 let btnScore2 = document.getElementById("score2"); // button of "average"
 let btnScore3 = document.getElementById("score3"); // button of "very nice"
-let bubbleWeather = document.getElementById("weather");
+let bubbleWeather = document.getElementById("weather"); // bubble of the weather
 function addJokeToParagraph() {
     return __awaiter(this, void 0, void 0, function* () {
+        // try to make the request to the API and get the data
         try {
-            // try to make the request to the API and get the data
-            let res = yield fetch(API, {
+            apiSelectorNumber = Math.floor(Math.random() * 3 + 1); // get random number from 1 to 3 for choosing the API where we will request
+            let res = yield fetch(apiSelectorNumber === 1 ? APIJOKES1 : apiSelectorNumber === 2 ? APIJOKES2 : APIJOKESRELIGIOUS, {
                 headers: {
                     'accept': 'application/json',
                 }
             });
+            console.log(apiSelectorNumber);
             // Verify if the response is ok, if it isn't then throw an error
             if (!res.ok) {
                 throw new Error('Error in the API request');
             }
             // Pick the data from the json formant and assign to 'data' variable
             let data = yield res.json();
+            console.log(data);
             // If jokeElement exists then assign the new joke from data.joke
             if (jokeElement) {
                 jokeElement.innerHTML = data.joke;
@@ -132,7 +139,6 @@ function weatherRequest() {
             bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(temperature);
             bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(wind);
             bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(clouds);
-            console.log(data);
             return data;
         }
         catch (e) {
