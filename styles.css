@@ -1,40 +1,127 @@
-body{
-background-image: url("https://media.istockphoto.com/id/1600458918/vector/laugh-ha-ha-background.jpg?s=612x612&w=0&k=20&c=rW6TtC5pbxhEWTo42AaJ7IOw2GI6Z8YX7tBZbaX_C1Y=");
-background-repeat: repeat;
-background-position: center;
-background-size: cover;
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-repeat: repeat;
+  background-position: center;
+  background-size: cover;
+  height: 100vh;
+  background-color: rgb(108, 98, 154) !important;
 }
-#box{
-    background-color: rgb(0, 0, 0);
-    border-radius: 5px ;
-    border: 5px solid red
+#title {
+  color: black;
 }
-#joke{
-    color:antiquewhite!important;
-    font-size: x-large;
-    font-weight: 500;
-    font-family: 'Times New Roman', Times, serif;
+
+#joke {
+  font-weight: 500;
+  font-family: "Times New Roman", Times, serif;  
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: black;
+  padding: 10px;
+  margin:auto;
 }
-#next{
-    color:red!important;
-    font-weight: bolder;
-    font-style: oblique;
-    border: 3px dotted red;
+
+#container {
+   height: 100vh; 
+   display: flex;
+   flex-direction: column;
+} 
+
+.pattern1 {
+    background-image: url(/Icons/pattern6.svg), url(/Icons/pattern-2.png);
+    background-size: 60%;
+    background-repeat: no-repeat;
+    background-position: top;
+    height: 100vh;
 }
-#title{
-    margin-top : -100px;
-    color:antiquewhite!important;
+
+.pattern2 {
+    background-image: url(/Icons/pattern4.svg), url(/Icons/pattern-1.png);
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: 60%;
 }
-#score1, #score2, #score3 {
-    color: antiquewhite;
+
+.pattern3 {
+    background-image: url(/Icons/pattern5.svg), url(/Icons/pattern-3.png);
+    background-position: top;
+    background-size: 60%;
+    background-repeat: no-repeat;
 }
-#weather {   
-    color:black!important;
-    background-image: url("https://p.turbosquid.com/ts-thumb/iH/hBIRSt/Ew/66/png/1679470685/5000x5000/fit_q99/713c6591f0f254b5850eac4cbabad33c6dd6f1d6/66.jpg");
-    background-size:contain;
-    border-radius: 100px;
-    border: 5px solid antiquewhite;
-    height: 170px;
-    text-align: center;
+
+.containerScoring{
+  position:relative;
+  width: 30%;
+  align-self: center;
+  display:flex;
+  flex-direction: column;
 }
-#weather p {color:black;}
+
+.scoringGroup {
+  display: flex;
+  justify-content: space-between;
+  margin: auto;
+  background-color: transparent !important;
+}
+
+.icon {
+  flex-direction: column;
+  width: 20%;
+}
+
+.icon:hover {
+  transition: all 0.5s;
+  transform: scale(1.2);
+}
+.btn:hover {
+  transition: all 0.5s;
+  transform: scale(1.1);
+}
+
+#weather {
+  color: rgb(249, 244, 244) !important;
+  background-image: url("https://p.turbosquid.com/ts-thumb/iH/hBIRSt/Ew/66/png/1679470685/5000x5000/fit_q99/713c6591f0f254b5850eac4cbabad33c6dd6f1d6/66.jpg");
+  background-size: contain;
+  border-radius: 100px;
+  border: 5px solid antiquewhite;
+  height: 170px;
+  text-align: center;
+}
+
+.weather-container {
+  display: flex;
+  justify-content: space-evenly;
+  width: 180px;
+  height: 100px;
+  margin: 10px;
+}
+
+.weather-img {
+  flex: 50%;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  padding: 10px;
+  margin: auto;
+}
+
+.weather-text {
+  border-left: 2px solid antiquewhite;
+  flex: 50%;
+  color: antiquewhite;
+  margin: auto;
+  padding: 10px;
+  font-weight: 700;
+  font-size: large;
+}
+
+@media (max-width: 768px) {
+  .pattern1, .pattern2, .pattern3 {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100vh;
+}
+}

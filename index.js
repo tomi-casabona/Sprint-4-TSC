@@ -8,77 +8,150 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-//Variables
-let jokeElement = document.getElementById("joke"); // joke paragraph element
-let jokeBtn = document.getElementById("next"); // next joke button
-let APIJOKES1 = 'https://icanhazdadjoke.com/'; // API endpoint
-let APIJOKES2 = "https://v2.jokeapi.dev/joke/Any?type=single"; //API endpoint
-let APIJOKESRELIGIOUS = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,political,racist,sexist,explicit&type=single"; //API endpoint
-let APIWEATHER = "https://www.meteosource.com/api/v1/free/point?place_id=barcelona&sections=current&timezone=Europe%2FMadrid&language=en&units=auto&key=ls7dk118dcil19tkre8c7pwzkdgoerlvo5dmtbsm"; // API endpoint
+//Global Constants
+const APIJOKES1 = 'https://icanhazdadjoke.com/'; // API endpoint
+const APIJOKES2 = "https://v2.jokeapi.dev/joke/Any?type=single"; //API endpoint
+const APIJOKESRELIGIOUS = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,political,racist,sexist,explicit&type=single"; //API endpoint
+const APIWEATHER = "https://www.meteosource.com/api/v1/free/point?place_id=barcelona&sections=current&timezone=Europe%2FMadrid&language=en&units=auto&key=ls7dk118dcil19tkre8c7pwzkdgoerlvo5dmtbsm"; // API endpoint
+const sunnyDayImg = "/Icons/weather/sol.png";
+const partlyCloudyDay = "/Icons/weather/nube.png";
+const cloudyDay = "/Icons/weather/nubes.png";
+const rainyDay = "/Icons/weather/lluvia.png";
+//Global Variables
 let apiSelectorNumber; // used for choosing the jokes API
 let currentReport; // jokeReport variable
 let reportAcudits = []; // Array of joke reports
+let acumulatedBackground; // variable number for changing the background
+//Dom Elements
+let jokeElement = document.getElementById("joke"); // joke paragraph element
+let jokeBtn = document.getElementById("next"); // next joke button
 let btnScore1 = document.getElementById("score1"); // button of "boring"
 let btnScore2 = document.getElementById("score2"); // button of "average"
 let btnScore3 = document.getElementById("score3"); // button of "very nice"
 let bubbleWeather = document.getElementById("weather"); // bubble of the weather
-function addJokeToParagraph() {
+let containerElement = document.getElementById("container"); // general container element
+let imageWeatherElement = document.getElementById("weather-img"); // weather img element
+let textWeatherElement = document.getElementById("weather-text"); // weather text element
+//Add the first joke in the html /////////////////////////////////////////////////////
+addJokeToParagraph();
+weatherRequest();
+iniciarEventListeners();
+//Event Listeners
+function iniciarEventListeners() {
+    //'Next' button for execute addJokeToParagraph function, if jokeBtn exists
+    if (jokeBtn) {
+        jokeBtn.addEventListener('click', () => nextJoke());
+    }
+    else {
+        throw new Error("Next button is not found");
+    }
+    // for scoring buttons
+    if (btnScore1) {
+        btnScore1.addEventListener('click', () => createReport(1));
+    }
+    if (btnScore2) {
+        btnScore2.addEventListener('click', () => createReport(2));
+    }
+    if (btnScore3) {
+        btnScore3.addEventListener('click', () => createReport(3));
+    }
+}
+// changePattern function, change the background image in every click
+function changePattern() {
+    let className = "";
+    if (acumulatedBackground < 1) {
+        className = "pattern1";
+        acumulatedBackground = 2;
+    }
+    else if (acumulatedBackground === 2) {
+        className = "pattern2";
+        acumulatedBackground = 3;
+    }
+    else {
+        className = "pattern3";
+        acumulatedBackground = 0;
+    }
+    if (containerElement) {
+        containerElement.className = className;
+    }
+}
+// async function for fetching data from a given api Endpoint
+function fetchData(url) {
     return __awaiter(this, void 0, void 0, function* () {
-        // try to make the request to the API and get the data
         try {
-            apiSelectorNumber = Math.floor(Math.random() * 3 + 1); // get random number from 1 to 3 for choosing the API where we will request
-            let res = yield fetch(apiSelectorNumber === 1 ? APIJOKES1 : apiSelectorNumber === 2 ? APIJOKES2 : APIJOKESRELIGIOUS, {
+            const response = yield fetch(url, {
                 headers: {
                     'accept': 'application/json',
                 }
             });
-            console.log(apiSelectorNumber);
-            // Verify if the response is ok, if it isn't then throw an error
-            if (!res.ok) {
+            if (!response.ok) {
                 throw new Error('Error in the API request');
             }
-            // Pick the data from the json formant and assign to 'data' variable
-            let data = yield res.json();
-            console.log(data);
-            // If jokeElement exists then assign the new joke from data.joke
+            const data = yield response.json();
+            return data;
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+            else {
+                console.log('error: ' + error);
+                throw new Error('Unknown error occurred');
+            }
+        }
+    });
+}
+// AddJokeToParagrapg try to make the request to the API & manage function calls about jokes
+function addJokeToParagraph() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            apiSelectorNumber = Math.floor(Math.random() * 3 + 1);
+            const apiUrl = apiSelectorNumber === 1 ? APIJOKES1 : apiSelectorNumber === 2 ? APIJOKES2 : APIJOKESRELIGIOUS;
+            const data = yield fetchData(apiUrl);
             if (jokeElement) {
                 jokeElement.innerHTML = data.joke;
+                changePattern();
             }
             else {
                 throw new Error('JokeElement is null');
             }
         }
-        catch (e) {
-            // Catch all exceptions from API request
-            if (e instanceof Error) {
-                throw new Error(e.message);
+        catch (error) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
             }
             else {
-                console.log('error: ' + e);
+                console.log('error: ' + error);
+                throw new Error('Unknown error occurred');
             }
         }
     });
 }
-//Add the first joke in the html
-addJokeToParagraph();
-//Add event listener to 'Next' button for execute addJokeToParagraph function, if jokeBtn exists
-if (jokeBtn) {
-    jokeBtn.addEventListener('click', () => nextJoke());
+// weather api request & handling the functions calls about the weather
+function weatherRequest() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const data = yield fetchData(APIWEATHER);
+            console.log(data);
+            const clouds = data.current.cloud_cover;
+            const rain = data.current.precipitation.total;
+            const temperature = data.current.temperature;
+            changeImage(clouds, rain);
+            changeTemperature(temperature);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+            else {
+                console.log('error: ' + error);
+                throw new Error('Unknown error occurred');
+            }
+        }
+    });
 }
-else {
-    throw new Error("Next button is not found");
-}
-//Add event listener for scoring buttons
-if (btnScore1) {
-    btnScore1.addEventListener('click', () => createReport(1));
-}
-if (btnScore2) {
-    btnScore2.addEventListener('click', () => createReport(2));
-}
-if (btnScore3) {
-    btnScore3.addEventListener('click', () => createReport(3));
-}
-// createReport function create an object type JokeReport where the client leave the joke's score (1|2|3) and store it with the joke and the date
+// createReport function create an object type JokeReport where the client leave the joke's score (1|2|3) and store it with the joke and the date.
+//@param jokeReport is for scoring the joke
 function createReport(num) {
     if (jokeElement) {
         let report = {
@@ -107,49 +180,40 @@ function addReport() {
 function showJokesReport() {
     console.log(reportAcudits);
 }
-// nextJoke function call addReport function and call addJokeReport function;
+// nextJoke function for handling the next joke event
 function nextJoke() {
     addReport();
     addJokeToParagraph();
     showJokesReport();
 }
-// weather api request
-function weatherRequest() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            let res = yield fetch(APIWEATHER, {
-                headers: {
-                    'accept': 'application/json',
-                }
-            });
-            if (!res.ok) {
-                throw new Error('Error in the API request');
-            }
-            let data = yield res.json();
-            // create elements for weather data
-            let location = document.createElement("p");
-            let temperature = document.createElement("p");
-            let wind = document.createElement("p");
-            let clouds = document.createElement("p");
-            location.innerHTML = `Barcelona`;
-            temperature.innerHTML = `Temperature : ${data.current.temperature}°C`;
-            wind.innerHTML = `Wind : ${data.current.wind.speed} km/h`;
-            clouds.innerHTML = `Clouds cover : ${data.current.cloud_cover} %`;
-            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(location);
-            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(temperature);
-            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(wind);
-            bubbleWeather === null || bubbleWeather === void 0 ? void 0 : bubbleWeather.appendChild(clouds);
-            return data;
+// change the weather image in the widget depending on atribute SRC in IMG element based on two parameters 
+// @param clouds: number = percentage of clouds in the sky requested to the API
+// @param rain: number = percentage of posibility to rain requested to the API
+function changeImage(clouds, rain) {
+    if (imageWeatherElement) {
+        if (rain > 50) {
+            imageWeatherElement.setAttribute('src', rainyDay);
         }
-        catch (e) {
-            // Catch all exceptions from API request
-            if (e instanceof Error) {
-                throw new Error(e.message);
-            }
-            else {
-                console.log('error: ' + e);
-            }
+        else if (clouds < 20) {
+            imageWeatherElement.setAttribute('src', sunnyDayImg);
         }
-    });
+        else if (clouds >= 20 && clouds < 40) {
+            imageWeatherElement.setAttribute('src', partlyCloudyDay);
+        }
+        else if (clouds >= 4) {
+            imageWeatherElement.setAttribute('src', cloudyDay);
+        }
+    }
+    else {
+        throw new Error('imageWeatherElement is not available');
+    }
 }
-weatherRequest();
+// changeTemperature is for change the temperature number to weather widget
+function changeTemperature(temp) {
+    if (textWeatherElement) {
+        textWeatherElement.innerHTML = `${temp} °C`;
+    }
+    else {
+        throw new Error('textWetherElement is not available');
+    }
+}
