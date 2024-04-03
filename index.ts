@@ -104,7 +104,7 @@ async function fetchData(url: string): Promise<any> {
     }
 }
 
-// AddJokeToParagrapg try to make the request to the API & manage function calls about jokes
+// AddJokeToParagrapg try to make the request to the API & manage function calls about jokesgi
 async function addJokeToParagraph() {
     try {
         apiSelectorNumber = Math.floor(Math.random() * 3 + 1);
