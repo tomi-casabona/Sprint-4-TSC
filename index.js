@@ -173,7 +173,7 @@ function addReport() {
         currentReport = undefined; //reset variable
     }
     else {
-        console.log("last joke is not scored");
+        alert("last joke was not scored");
     }
 }
 // show reportAcudits array
