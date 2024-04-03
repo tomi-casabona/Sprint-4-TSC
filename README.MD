@@ -38,3 +38,7 @@ npx tsc -w
 - Rate the joke whenever you want 
 
 
+## Images
+
+
+
