@@ -18,10 +18,14 @@ const partlyCloudyDay = "/Icons/weather/nube.png";
 const cloudyDay = "/Icons/weather/nubes.png";
 const rainyDay = "/Icons/weather/lluvia.png";
 //Global Variables
-let apiSelectorNumber; // used for choosing the jokes API
-let currentReport; // jokeReport variable
+let apiSelectorNumber; // Used for choosing the jokes API
+let currentReport; // new JokeReport 
 let reportAcudits = []; // Array of joke reports
-let acumulatedBackground; // variable number for changing the background
+let backgroundNumber; // Variable number for changing the background
+let apiUrl; // Selected api url 
+let clouds; // Percentage of clouds for weather widget
+let rain; // Percentage of rain for weather widget
+let temperature; // Temperature for weather widget
 //Dom Elements
 let jokeElement = document.getElementById("joke"); // joke paragraph element
 let jokeBtn = document.getElementById("next"); // next joke button
@@ -32,49 +36,63 @@ let bubbleWeather = document.getElementById("weather"); // bubble of the weather
 let containerElement = document.getElementById("container"); // general container element
 let imageWeatherElement = document.getElementById("weather-img"); // weather img element
 let textWeatherElement = document.getElementById("weather-text"); // weather text element
-//Add the first joke in the html /////////////////////////////////////////////////////
-addJokeToParagraph();
-weatherRequest();
-iniciarEventListeners();
-//Event Listeners
-function iniciarEventListeners() {
-    //'Next' button for execute addJokeToParagraph function, if jokeBtn exists
+// TODO: ANIMATION FOR SCORING //////////////////////////////////////////////////
+runWeb(); // Run webApp
+////////////////////// Run web app ////////////////////// 
+function runWeb() {
+    getApiSelectorNumber(); // get number of API selectors
+    getApiUrl(); // Get API url from selector number
+    addJokeToParagraph(); //Add the first joke in the html    
+    changeBackground(); //change background
+    handleWeatherWidget(); //Add weather widget 
+    handleEventListeners(); // add event listeners
+}
+// nextJoke function handle the next joke event
+function nextJoke() {
+    getApiSelectorNumber();
+    getApiUrl();
+    addJokeToParagraph();
+    changeBackground();
+    addReport();
+    showJokesReport();
+}
+//////////////////////  Event Listeners methods ////////////////////// 
+//Event Listeners handler
+function handleEventListeners() {
+    eventListenerNextBtn();
+    eventListenerScoringGroup();
+}
+//Add event listener for next joke btn
+function eventListenerNextBtn() {
     if (jokeBtn) {
         jokeBtn.addEventListener('click', () => nextJoke());
     }
     else {
         throw new Error("Next button is not found");
     }
-    // for scoring buttons
-    if (btnScore1) {
-        btnScore1.addEventListener('click', () => createReport(1));
-    }
-    if (btnScore2) {
-        btnScore2.addEventListener('click', () => createReport(2));
-    }
-    if (btnScore3) {
-        btnScore3.addEventListener('click', () => createReport(3));
-    }
 }
-// changePattern function, change the background image in every click
-function changePattern() {
-    let className = "";
-    if (acumulatedBackground < 1) {
-        className = "pattern1";
-        acumulatedBackground = 2;
-    }
-    else if (acumulatedBackground === 2) {
-        className = "pattern2";
-        acumulatedBackground = 3;
+//Add event listeer for scoring buttons
+function eventListenerScoringGroup() {
+    if (btnScore1) {
+        btnScore1.addEventListener('click', () => handleIconClick(1, btnScore1));
     }
     else {
-        className = "pattern3";
-        acumulatedBackground = 0;
+        throw new Error("Scoring button is not found");
     }
-    if (containerElement) {
-        containerElement.className = className;
+    if (btnScore2) {
+        btnScore2.addEventListener('click', () => handleIconClick(2, btnScore2));
+    }
+    else {
+        throw new Error("Scoring button is not found");
+    }
+    if (btnScore3) {
+        btnScore3.addEventListener('click', () => handleIconClick(3, btnScore3));
+    }
+    else {
+        throw new Error("Scoring button is not found");
     }
 }
+////////////////////// APIs Request Methods ////////////////////// 
 // async function for fetching data from a given api Endpoint
 function fetchData(url) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -101,16 +119,22 @@ function fetchData(url) {
         }
     });
 }
-// AddJokeToParagrapg try to make the request to the API & manage function calls about jokes
+//// JOKES APIs ////
+// Change the api selector number
+function getApiSelectorNumber() {
+    apiSelectorNumber === 1 ? apiSelectorNumber = 2 : apiSelectorNumber === 2 ? apiSelectorNumber = 3 : apiSelectorNumber = 1;
+}
+// Select API URL from apiSelectorNumber
+function getApiUrl() {
+    apiUrl = apiSelectorNumber === 1 ? APIJOKES1 : apiSelectorNumber === 2 ? APIJOKES2 : APIJOKESRELIGIOUS;
+}
+// AddJokeToParagraph add a new joke to paragraph
 function addJokeToParagraph() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            apiSelectorNumber = Math.floor(Math.random() * 3 + 1);
-            const apiUrl = apiSelectorNumber === 1 ? APIJOKES1 : apiSelectorNumber === 2 ? APIJOKES2 : APIJOKESRELIGIOUS;
             const data = yield fetchData(apiUrl);
             if (jokeElement) {
                 jokeElement.innerHTML = data.joke;
-                changePattern();
             }
             else {
                 throw new Error('JokeElement is null');
@@ -127,17 +151,27 @@ function addJokeToParagraph() {
         }
     });
 }
-// weather api request & handling the functions calls about the weather
+//// WEATHER API ////
+// handle weather functions
+function handleWeatherWidget() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let data = yield weatherRequest();
+        if (data) {
+            setWeatherVariables(data);
+            changeWeatherImage(clouds, rain);
+            changeTemperature(temperature);
+        }
+        else {
+            throw new Error('data is not available from  weather');
+        }
+    });
+}
+// weather api request 
 function weatherRequest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield fetchData(APIWEATHER);
-            console.log(data);
-            const clouds = data.current.cloud_cover;
-            const rain = data.current.precipitation.total;
-            const temperature = data.current.temperature;
-            changeImage(clouds, rain);
-            changeTemperature(temperature);
+            return data;
         }
         catch (error) {
             if (error instanceof Error) {
@@ -150,46 +184,21 @@ function weatherRequest() {
         }
     });
 }
-// createReport function create an object type JokeReport where the client leave the joke's score (1|2|3) and store it with the joke and the date.
-//@param jokeReport is for scoring the joke
-function createReport(num) {
-    if (jokeElement) {
-        let report = {
-            joke: jokeElement.textContent,
-            score: num,
-            date: new Date().toISOString()
-        };
-        currentReport = report;
-        return report;
+// set the meteorological variables with the data obtained from the API
+function setWeatherVariables(data) {
+    if (data) {
+        clouds = data.current.cloud_cover;
+        rain = data.current.precipitation.total;
+        temperature = data.current.temperature;
     }
     else {
-        throw new Error("JokeElement is not found");
+        throw new Error('data is not available from handleWeatherWidget');
     }
-}
-// addReport function receive a report parameter and save it in reportAcudits array when nextJoke button is clicked
-function addReport() {
-    if (currentReport) {
-        reportAcudits.push(currentReport); // add report to reportAcudits array
-        currentReport = undefined; //reset variable
-    }
-    else {
-        alert("last joke was not scored");
-    }
-}
-// show reportAcudits array
-function showJokesReport() {
-    console.log(reportAcudits);
-}
-// nextJoke function for handling the next joke event
-function nextJoke() {
-    addReport();
-    addJokeToParagraph();
-    showJokesReport();
 }
 // change the weather image in the widget depending on atribute SRC in IMG element based on two parameters 
 // @param clouds: number = percentage of clouds in the sky requested to the API
 // @param rain: number = percentage of posibility to rain requested to the API
-function changeImage(clouds, rain) {
+function changeWeatherImage(clouds, rain) {
     if (imageWeatherElement) {
         if (rain > 50) {
             imageWeatherElement.setAttribute('src', rainyDay);
@@ -217,3 +226,69 @@ function changeTemperature(temp) {
         throw new Error('textWetherElement is not available');
     }
 }
+////////////////////// Scoring methods ////////////////////// 
+// createReport function create an object type JokeReport where the client leave the joke's score (1|2|3) and store it with the joke and the date.
+//@param jokeReport is for scoring the joke
+function createReport(num) {
+    if (jokeElement) {
+        let report = {
+            joke: jokeElement.textContent,
+            score: num,
+            date: new Date().toISOString()
+        };
+        currentReport = report;
+        return report;
+    }
+    else {
+        throw new Error("JokeElement is not found");
+    }
+}
+// addReport function save a report in reportAcudits array when nextJoke button is clicked
+function addReport() {
+    if (currentReport) {
+        reportAcudits.push(currentReport); // add report to reportAcudits array
+        currentReport = undefined; //reset variable
+    }
+    else {
+        alert("last joke was not scored");
+    }
+}
+// show reportAcudits array
+function showJokesReport() {
+    console.log(reportAcudits);
+}
+////////////////////// Styling methods ////////////////////// 
+// changeBackground function, change the background image in every new joke
+function changeBackground() {
+    let className = "";
+    if (backgroundNumber < 1) {
+        className = "pattern1";
+        backgroundNumber = 2;
+    }
+    else if (backgroundNumber === 2) {
+        className = "pattern2";
+        backgroundNumber = 3;
+    }
+    else {
+        className = "pattern3";
+        backgroundNumber = 0;
+    }
+    if (containerElement) {
+        containerElement.className = className;
+    }
+}
+// call createReport for create a scoring report and then call animation function for tehe clicked icon
+function handleIconClick(num, e) {
+    createReport(num);
+    if (e) {
+        addAnimationToClickedIcon(e);
+    }
+}
+// add a class for the clicked Icon , that trows an animation, and 2 seconds later, remove that class 
+function addAnimationToClickedIcon(e) {
+    e.classList.add("clicked");
+    setTimeout(() => {
+        e.classList.remove('clicked');
+    }, 2000);
+}
+;

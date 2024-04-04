@@ -9,10 +9,14 @@ const cloudyDay = "/Icons/weather/nubes.png";
 const rainyDay = "/Icons/weather/lluvia.png";
 
 //Global Variables
-let apiSelectorNumber: number; // used for choosing the jokes API
-let currentReport: JokeReport | undefined; // jokeReport variable
+let apiSelectorNumber: number; // Used for choosing the jokes API
+let currentReport: JokeReport | undefined; // new JokeReport 
 let reportAcudits: JokeReport[] = []; // Array of joke reports
-let acumulatedBackground: number; // variable number for changing the background
+let backgroundNumber: number; // Variable number for changing the background
+let apiUrl: string; // Selected api url 
+let clouds: number; // Percentage of clouds for weather widget
+let rain: number; // Percentage of rain for weather widget
+let temperature: number; // Temperature for weather widget
 
 //Dom Elements
 let jokeElement = document.getElementById("joke"); // joke paragraph element
@@ -37,48 +41,69 @@ type JokeReport = {
     date: string
 }
 
-//Add the first joke in the html /////////////////////////////////////////////////////
-addJokeToParagraph();
-weatherRequest();
-iniciarEventListeners();
+// TODO: ANIMATION FOR SCORING //////////////////////////////////////////////////
 
-//Event Listeners
-function iniciarEventListeners() {
-    //'Next' button for execute addJokeToParagraph function, if jokeBtn exists
+runWeb(); // Run webApp
+
+////////////////////// Run web app ////////////////////// 
+function runWeb(): void {
+    getApiSelectorNumber(); // get number of API selectors
+    getApiUrl(); // Get API url from selector number
+    addJokeToParagraph();//Add the first joke in the html    
+    changeBackground();//change background
+    handleWeatherWidget();//Add weather widget 
+    handleEventListeners();// add event listeners
+}
+
+// nextJoke function handle the next joke event
+function nextJoke(): void {
+    getApiSelectorNumber();
+    getApiUrl();
+    addJokeToParagraph();
+    changeBackground();
+    addReport();
+    showJokesReport();
+}
+
+//////////////////////  Event Listeners methods ////////////////////// 
+
+//Event Listeners handler
+function handleEventListeners(): void {
+    eventListenerNextBtn();
+    eventListenerScoringGroup();
+
+}
+
+//Add event listener for next joke btn
+function eventListenerNextBtn(): void {
     if (jokeBtn) {
         jokeBtn.addEventListener('click', () => nextJoke());
     } else {
         throw new Error("Next button is not found");
     }
-    // for scoring buttons
+}
+
+//Add event listeer for scoring buttons
+function eventListenerScoringGroup(): void {
     if (btnScore1) {
-        btnScore1.addEventListener('click', () => createReport(1));
+        btnScore1.addEventListener('click', () => handleIconClick(1, btnScore1));
+    } else {
+        throw new Error("Scoring button is not found");
     }
     if (btnScore2) {
-        btnScore2.addEventListener('click', () => createReport(2));
+        btnScore2.addEventListener('click', () => handleIconClick(2, btnScore2));
+    } else {
+        throw new Error("Scoring button is not found");
     }
     if (btnScore3) {
-        btnScore3.addEventListener('click', () => createReport(3));
-    }
-}
-// changePattern function, change the background image in every click
-function changePattern(): void {
-    let className = "";
-
-    if (acumulatedBackground < 1) {
-        className = "pattern1";
-        acumulatedBackground = 2;
-    } else if (acumulatedBackground === 2) {
-        className = "pattern2";
-        acumulatedBackground = 3;
+        btnScore3.addEventListener('click', () => handleIconClick(3, btnScore3));
     } else {
-        className = "pattern3";
-        acumulatedBackground = 0;
-    }
-    if (containerElement) {
-        containerElement.className = className;
+        throw new Error("Scoring button is not found");
     }
 }
+
+////////////////////// APIs Request Methods ////////////////////// 
+
 // async function for fetching data from a given api Endpoint
 async function fetchData(url: string): Promise<any> {
     try {
@@ -87,11 +112,11 @@ async function fetchData(url: string): Promise<any> {
                 'accept': 'application/json',
             }
         });
-
+        
         if (!response.ok) {
             throw new Error('Error in the API request');
         }
-
+        
         const data = await response.json();
         return data;
     } catch (error) {
@@ -103,17 +128,25 @@ async function fetchData(url: string): Promise<any> {
         }
     }
 }
+//// JOKES APIs ////
 
-// AddJokeToParagrapg try to make the request to the API & manage function calls about jokesgi
+// Change the api selector number
+function getApiSelectorNumber(): void {
+    apiSelectorNumber === 1 ? apiSelectorNumber = 2 : apiSelectorNumber === 2 ? apiSelectorNumber = 3 : apiSelectorNumber = 1;
+}
+
+// Select API URL from apiSelectorNumber
+function getApiUrl(): void {
+    apiUrl = apiSelectorNumber === 1 ? APIJOKES1 : apiSelectorNumber === 2 ? APIJOKES2 : APIJOKESRELIGIOUS;
+}
+
+// AddJokeToParagraph add a new joke to paragraph
 async function addJokeToParagraph() {
     try {
-        apiSelectorNumber = Math.floor(Math.random() * 3 + 1);
-        const apiUrl = apiSelectorNumber === 1 ? APIJOKES1 : apiSelectorNumber === 2 ? APIJOKES2 : APIJOKESRELIGIOUS;
         const data = await fetchData(apiUrl);
 
         if (jokeElement) {
             jokeElement.innerHTML = data.joke;
-            changePattern();
         } else {
             throw new Error('JokeElement is null')
         }
@@ -127,19 +160,25 @@ async function addJokeToParagraph() {
     }
 }
 
-// weather api request & handling the functions calls about the weather
+//// WEATHER API ////
+// handle weather functions
+async function handleWeatherWidget(){
+    let data = await  weatherRequest();
+    if(data){
+    setWeatherVariables(data);
+    changeWeatherImage(clouds, rain);
+    changeTemperature(temperature); 
+}else{
+    throw new Error('data is not available from  weather');
+}
+}
+
+// weather api request 
 async function weatherRequest() {
     try {
         const data = await fetchData(APIWEATHER);
-
-        console.log(data);
-
-        const clouds = data.current.cloud_cover;
-        const rain = data.current.precipitation.total;
-        const temperature = data.current.temperature;
-
-        changeImage(clouds, rain);
-        changeTemperature(temperature);
+        return data;
+        
     } catch (error) {
         if (error instanceof Error) {
             throw new Error(error.message);
@@ -149,6 +188,48 @@ async function weatherRequest() {
         }
     }
 }
+
+// set the meteorological variables with the data obtained from the API
+function setWeatherVariables(data : any) :void {
+    if(data){
+        clouds = data.current.cloud_cover;
+        rain = data.current.precipitation.total;
+        temperature = data.current.temperature;   
+    }else{
+        throw new Error('data is not available from handleWeatherWidget');
+    }
+}
+
+// change the weather image in the widget depending on atribute SRC in IMG element based on two parameters 
+// @param clouds: number = percentage of clouds in the sky requested to the API
+// @param rain: number = percentage of posibility to rain requested to the API
+function changeWeatherImage(clouds: number, rain: number) {
+    if (imageWeatherElement) {
+        if (rain > 50) {
+            imageWeatherElement.setAttribute('src', rainyDay);
+        } else if (clouds < 20) {
+            imageWeatherElement.setAttribute('src', sunnyDayImg);
+        } else if (clouds >= 20 && clouds < 40) {
+            imageWeatherElement.setAttribute('src', partlyCloudyDay);
+        } else if (clouds >= 4) {
+            imageWeatherElement.setAttribute('src', cloudyDay);
+        }
+    } else {
+        throw new Error('imageWeatherElement is not available')
+    }
+}
+
+// changeTemperature is for change the temperature number to weather widget
+function changeTemperature(temp: number): void {
+    if (textWeatherElement) {
+        textWeatherElement.innerHTML = `${temp} °C`
+    } else {
+        throw new Error('textWetherElement is not available')
+    }
+}
+
+////////////////////// Scoring methods ////////////////////// 
+
 
 // createReport function create an object type JokeReport where the client leave the joke's score (1|2|3) and store it with the joke and the date.
 //@param jokeReport is for scoring the joke
@@ -167,8 +248,8 @@ function createReport(num: 1 | 2 | 3): JokeReport {
     }
 }
 
-// addReport function receive a report parameter and save it in reportAcudits array when nextJoke button is clicked
-function addReport() {
+// addReport function save a report in reportAcudits array when nextJoke button is clicked
+function addReport(): void {
     if (currentReport) {
         reportAcudits.push(currentReport); // add report to reportAcudits array
         currentReport = undefined; //reset variable
@@ -176,43 +257,43 @@ function addReport() {
 }
 
 // show reportAcudits array
-function showJokesReport() {
+function showJokesReport(): void {
     console.log(reportAcudits)
 }
 
-// nextJoke function for handling the next joke event
-function nextJoke() {
-    addReport();
-    addJokeToParagraph();
-    showJokesReport();
-}
+////////////////////// Styling methods ////////////////////// 
 
-// change the weather image in the widget depending on atribute SRC in IMG element based on two parameters 
-// @param clouds: number = percentage of clouds in the sky requested to the API
-// @param rain: number = percentage of posibility to rain requested to the API
+// changeBackground function, change the background image in every new joke
+function changeBackground(): void {
+    let className = "";
 
-function changeImage(clouds: number, rain: number) {
-    if (imageWeatherElement) {
-        if (rain > 50) {
-            imageWeatherElement.setAttribute('src', rainyDay);
-        } else if (clouds < 20) {
-            imageWeatherElement.setAttribute('src', sunnyDayImg);
-        } else if (clouds >= 20 && clouds < 40) {
-            imageWeatherElement.setAttribute('src', partlyCloudyDay);
-        } else if (clouds >= 4) {
-            imageWeatherElement.setAttribute('src', cloudyDay);
-        }
+    if (backgroundNumber < 1) {
+        className = "pattern1";
+        backgroundNumber = 2;
+    } else if (backgroundNumber === 2) {
+        className = "pattern2";
+        backgroundNumber = 3;
     } else {
-        throw new Error('imageWeatherElement is not available')
+        className = "pattern3";
+        backgroundNumber = 0;
+    }
+    if (containerElement) {
+        containerElement.className = className;
     }
 }
-
-// changeTemperature is for change the temperature number to weather widget
-function changeTemperature(temp: number) {
-    if (textWeatherElement) {
-        textWeatherElement.innerHTML = `${temp} °C`
-    } else {
-        throw new Error('textWetherElement is not available')
+ // call createReport for create a scoring report and then call animation function for tehe clicked icon
+function handleIconClick( num : 1|2|3 , e : HTMLElement|null){
+    createReport(num);
+    if(e){
+    addAnimationToClickedIcon(e);
     }
-}
+    }
+
+// add a class for the clicked Icon , that trows an animation, and 2 seconds later, remove that class 
+function addAnimationToClickedIcon(e : HTMLElement){
+e.classList.add("clicked");
+setTimeout(() => {
+    e.classList.remove('clicked');
+  }, 2000);
+};
 

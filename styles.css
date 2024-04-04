@@ -14,48 +14,48 @@ body {
 
 #joke {
   font-weight: 500;
-  font-family: "Times New Roman", Times, serif;  
+  font-family: "Times New Roman", Times, serif;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: black;
   padding: 10px;
-  margin:auto;
+  margin: auto;
 }
 
 #container {
-   height: 100vh; 
-   display: flex;
-   flex-direction: column;
-} 
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
 .pattern1 {
-    background-image: url(/Icons/pattern6.svg), url(/Icons/pattern-2.png);
-    background-size: 60%;
-    background-repeat: no-repeat;
-    background-position: top;
-    height: 100vh;
+  background-image: url(/Icons/pattern6.svg), url(/Icons/pattern-2.png);
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: top;
+  height: 100vh;
 }
 
 .pattern2 {
-    background-image: url(/Icons/pattern4.svg), url(/Icons/pattern-1.png);
-    background-repeat: no-repeat;
-    background-position: top;
-    background-size: 60%;
+  background-image: url(/Icons/pattern4.svg), url(/Icons/pattern-1.png);
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 60%;
 }
 
 .pattern3 {
-    background-image: url(/Icons/pattern5.svg), url(/Icons/pattern-3.png);
-    background-position: top;
-    background-size: 60%;
-    background-repeat: no-repeat;
+  background-image: url(/Icons/pattern5.svg), url(/Icons/pattern-3.png);
+  background-position: top;
+  background-size: 60%;
+  background-repeat: no-repeat;
 }
 
-.containerScoring{
-  position:relative;
+.containerScoring {
+  position: relative;
   width: 30%;
   align-self: center;
-  display:flex;
+  display: flex;
   flex-direction: column;
 }
 
@@ -69,6 +69,20 @@ body {
 .icon {
   flex-direction: column;
   width: 20%;
+}
+.clicked { 
+  animation-name: iconUp;
+  animation-duration: 2s;
+  transition-timing-function: ease-in ;
+}
+
+@keyframes iconUp {
+  0% {
+    transform:translateY(0);
+  }
+  100% {
+    transform:translateY(-1000px);
+  }
 }
 
 .icon:hover {
@@ -118,10 +132,12 @@ body {
 }
 
 @media (max-width: 768px) {
-  .pattern1, .pattern2, .pattern3 {
+  .pattern1,
+  .pattern2,
+  .pattern3 {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     height: 100vh;
-}
+  }
 }
